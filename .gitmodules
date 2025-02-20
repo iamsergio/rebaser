@@ -1,0 +1,3 @@
+[submodule "3rdparty/DeclarativeWidgets"]
+	path = 3rdparty/DeclarativeWidgets
+	url = https://github.com/iamsergio/DeclarativeWidgets.git
