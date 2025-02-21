@@ -26,6 +26,7 @@ MainWindow {
             TreeView {}
             TextEdit {
                 id: textEdit
+                readOnly: true
                 font.pixelSize: 14
                 font.family: "FiraCode Nerd Font Mono"
                 plainText: "label onto
