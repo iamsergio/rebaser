@@ -6,7 +6,12 @@ MainWindow {
     id: root
 
     windowTitle: "Rebaser"
-    size: Qt.size(800, 600)
+    size: Qt.size(800, 700)
+    visible: true
+
+    Component.onCompleted: {
+        console.log("Loaded main window");
+    }
 
     MenuBar {
         Menu {
