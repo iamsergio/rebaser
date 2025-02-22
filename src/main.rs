@@ -6,6 +6,11 @@ fn main() {
     let mut app = QApplication::new();
     let mut engine = QQmlApplicationEngine::new();
 
+    let args: Vec<String> = std::env::args().collect();
+    let filename = args
+        .get(1)
+        .expect("Please provide the git todo list as first argument");
+
     // Load the QML path into the engine
     if let Some(engine) = engine.as_mut() {
         // engine.load(&QUrl::from("qrc:/qt/qml/com/kdab/rebaser/qml/main.qml"));

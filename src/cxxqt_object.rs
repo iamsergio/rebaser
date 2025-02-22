@@ -9,15 +9,13 @@ pub mod qobject {
     }
 
     unsafe extern "RustQt" {
-        // The QObject definition
-        // We tell CXX-Qt that we want a QObject class with the name MyObject
-        // based on the Rust struct MyObjectRust.
         #[qobject]
         #[qml_element]
+        #[qml_singleton]
         #[qproperty(i32, number)]
-        #[qproperty(QString, string)]
+        #[qproperty(QString, filename)]
         #[namespace = "my_object"]
-        type MyObject = super::MyObjectRust;
+        type MyObject = super::Controller;
     }
 
     unsafe extern "RustQt" {
@@ -37,9 +35,9 @@ use cxx_qt_lib::QString;
 
 /// The Rust struct for the QObject
 #[derive(Default)]
-pub struct MyObjectRust {
+pub struct Controller {
     number: i32,
-    string: QString,
+    filename: QString,
 }
 
 impl qobject::MyObject {
@@ -50,7 +48,7 @@ impl qobject::MyObject {
     }
 
     /// Print a log message with the given string and number
-    pub fn say_hi(&self, string: &QString, number: i32) {
-        println!("Hi from Rust! String is '{string}' and number is {number}");
+    pub fn say_hi(&self, filename: &QString, number: i32) {
+        println!("Hi from Rust! String is '{filename}' and number is {number}");
     }
 }

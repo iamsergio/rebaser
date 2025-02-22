@@ -1,0 +1,40 @@
+label onto
+
+# Branch cmake
+reset onto
+pick 1978840 build: Port to CMake
+pick dc6a141 build: Add a CMakePresets.json file
+pick 3773644 tests: stabilize
+pick 35ad4f5 tests: blacklist tst_formlayout
+pick 4f6b627 ci: Add build.yml
+update-ref refs/heads/cmake
+
+label cmake
+
+# Branch qt6
+reset cmake # ci: Add build.yml
+pick e06159d fix(qt6): Added missing QWidget and QTextDocument include
+pick 434e91b fix(qt6): Fix build error assigning 0 to Qt::Alignment
+pick b057bc9 fix(qt6): Don't use QTextCodec, it's UTF-8 by default
+pick ceac1b1 fix(qt6): Use Qt::endl instead of endl
+pick 5322e6a fix(qt6): Use correct integer type in Qt6
+pick 668bde8 fix(qt6): Add missing includes
+pick b8deca2 fix(qt6): Use qmlRegisterAnonymousType
+pick a572457 fix(qt6): Don't register QSizePolicy
+update-ref refs/heads/qt6
+
+label qt6
+
+# Branch margin
+reset qt6 # fix(qt6): Don't register QSizePolicy
+pick f23d090 fix(qt6): Add 'margin' property to layouts for compat with Qt 5
+update-ref refs/heads/margin
+
+label margin
+
+reset onto
+pick 4358f49 personal: Add my vscode workspace
+merge -C 83636d6 cmake # Merge branch 'cmake'
+merge -C df98d3c qt6 # Merge branch 'qt6'
+merge -C 17c09fc margin # Merge branch 'margin'
+pick 8d3a2f7 feat: Add support for qmlls language server completion
