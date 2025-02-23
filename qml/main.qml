@@ -3,6 +3,7 @@ import QtQml
 import QtQuick // for QFont
 
 import com.kdab.rebaser
+import JsonModel
 
 QW.MainWindow {
     id: root
@@ -15,6 +16,16 @@ QW.MainWindow {
         console.log("Loaded main window");
     }
 
+    JsonModel {
+        id: otherBranchesTreeModel
+        jsonText: controller.other_branches_json
+    }
+
+    JsonModel {
+        id: workBranchListModel
+        jsonText: controller.work_branches_json
+    }
+
     QW.MenuBar {
         QW.Menu {
             title: "File"
@@ -24,6 +35,14 @@ QW.MainWindow {
                     Qt.quit();
                 }
             }
+        }
+    }
+
+    RustController {
+        id: controller
+
+        Component.onCompleted: {
+            controller.loadData();
         }
     }
 
@@ -72,13 +91,20 @@ QW.MainWindow {
     QW.Widget {
         id: centralWidget
         QW.HBoxLayout {
-            QW.TreeView {}
+            QW.TreeView {
+                id: otherBranchesTreeView
+            }
+
+            QW.ListView {
+                id: workBranchListView
+            }
+
             QW.TextEdit {
                 id: textEdit
                 readOnly: true
                 font.pixelSize: 14
                 font.family: "FiraCode Nerd Font Mono"
-                plainText: MyObject.filename
+                plainText: controller.text
             }
         }
     }

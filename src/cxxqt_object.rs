@@ -1,7 +1,6 @@
 /// The bridge definition for our QObject
 #[cxx_qt::bridge]
 pub mod qobject {
-
     unsafe extern "C++" {
         include!("cxx-qt-lib/qstring.h");
         /// An alias to the QString type
@@ -11,22 +10,17 @@ pub mod qobject {
     unsafe extern "RustQt" {
         #[qobject]
         #[qml_element]
-        #[qml_singleton]
-        #[qproperty(i32, number)]
-        #[qproperty(QString, filename)]
+        #[qproperty(QString, other_branches_json)]
+        #[qproperty(QString, work_branches_json)]
+        #[qproperty(QString, text)]
         #[namespace = "my_object"]
-        type MyObject = super::Controller;
+        type RustController = super::Controller;
     }
 
     unsafe extern "RustQt" {
-        // Declare the invocable methods we want to expose on the QObject
         #[qinvokable]
-        #[cxx_name = "incrementNumber"]
-        fn increment_number(self: Pin<&mut MyObject>);
-
-        #[qinvokable]
-        #[cxx_name = "sayHi"]
-        fn say_hi(self: &MyObject, string: &QString, number: i32);
+        #[cxx_name = "loadData"]
+        fn load_data(self: Pin<&mut RustController>);
     }
 }
 
@@ -34,21 +28,32 @@ use core::pin::Pin;
 use cxx_qt_lib::QString;
 
 /// The Rust struct for the QObject
-#[derive(Default)]
 pub struct Controller {
-    number: i32,
-    filename: QString,
+    other_branches_json: QString,
+    work_branches_json: QString,
+    text: QString,
 }
 
-impl qobject::MyObject {
-    /// Increment the number Q_PROPERTY
-    pub fn increment_number(self: Pin<&mut Self>) {
-        let previous = *self.number();
-        self.set_number(previous + 1);
+impl Default for Controller {
+    fn default() -> Self {
+        println!("Create controller!");
+        Self {
+            other_branches_json: QString::from(""),
+            work_branches_json: QString::from(""),
+            text: QString::from(""),
+        }
     }
+}
 
-    /// Print a log message with the given string and number
-    pub fn say_hi(&self, filename: &QString, number: i32) {
-        println!("Hi from Rust! String is '{filename}' and number is {number}");
+impl qobject::RustController {
+    pub fn load_data(self: Pin<&mut Self>) {
+        let args: Vec<String> = std::env::args().collect();
+        let filename = args
+            .get(1)
+            .expect("Please provide the git todo list as first argument");
+        let file_contents =
+            std::fs::read_to_string(filename).expect("Should have been able to read the file11");
+
+        self.set_text(file_contents.into());
     }
 }
