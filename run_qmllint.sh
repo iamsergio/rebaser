@@ -1,3 +1,5 @@
-cmake --preset=dev &&
+cargo build &&
+	cmake --preset=dev &&
 	cmake --build build-dev &&
-	qmllint -I ./build-dev/qml/ -I ./target/debug/build/rebaser-11cc38be3fbba01f/out/qt-build-utils/qml_modules/ qml/main.qml
+	QT_BUILD_UTILS=$(find . -path "./target/debug/build/rebaser-*/out/qt-build-utils/qml_modules" | head -n 1) &&
+	qmllint -I ./build-dev/qml/ -I ${QT_BUILD_UTILS} qml/main.qml

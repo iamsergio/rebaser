@@ -1,4 +1,4 @@
 [General]
-buildDir="@CMAKE_BINARY_DIR@/qml"
-no-cmake-calls=false
+buildDir="@CMAKE_BINARY_DIR@:@CXXQT_OUT_DIR@"
+no-cmake-calls=true
 importPaths="/data/secured/home/serj/Qt/6.8.2/gcc_64/qml"

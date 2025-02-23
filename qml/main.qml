@@ -2,7 +2,7 @@ import QtWidgets as QW
 import QtQml
 import QtQuick // for QFont
 
-import com.kdab.rebaser 1.0
+import com.kdab.rebaser
 
 QW.MainWindow {
     id: root

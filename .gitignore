@@ -15,7 +15,7 @@ qrc_*.cpp
 /examples/text-editor/text-editor
 /extensionplugin/libdeclarativewidgetsplugin.so
 /tests/tests
-/build*
+/build-*
 /.cache/
 /compile_commands.json
 bookstore.db
