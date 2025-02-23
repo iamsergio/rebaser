@@ -11,7 +11,7 @@ fn main() {
 
     let qmlls_ini = qmlls_ini_in
         .replace("@CXXQT_OUT_DIR@", &out_dir)
-        .replace("@CMAKE_BINARY_DIR@", "/data/sources/rebaser/build-dev/qml");
+        .replace("@CMAKE_BINARY_DIR@", "/data/sources/rebaser/build-dev/");
     std::fs::write(".qmlls.ini", qmlls_ini).expect("Failed to write to .qmlls.ini");
 
     CxxQtBuilder::new()
