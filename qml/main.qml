@@ -3,16 +3,35 @@ import QtQml
 import QtQuick // for QFont
 
 import com.kdab.rebaser
+import JsonModel
 
 QW.MainWindow {
     id: root
 
     windowTitle: "Rebaser"
-    size: Qt.size(800, 700)
+    size: Qt.size(1000, 1000)
     visible: true
 
     Component.onCompleted: {
         console.log("Loaded main window");
+    }
+
+    JsonModel {
+        id: otherBranchesTreeModel
+        jsonText: controller.other_branches_json
+    }
+
+    JsonModel {
+        id: workBranchListModel
+        jsonText: controller.work_branches_json
+    }
+
+    RustController {
+        id: controller
+
+        Component.onCompleted: {
+            controller.loadData();
+        }
     }
 
     QW.MenuBar {
@@ -72,13 +91,23 @@ QW.MainWindow {
     QW.Widget {
         id: centralWidget
         QW.HBoxLayout {
-            QW.TreeView {}
+            QW.TreeView {
+                id: otherBranchesTreeView
+                QW.HBoxLayout.stretch: 1
+            }
+
+            QW.ListView {
+                id: workBranchListView
+                QW.HBoxLayout.stretch: 1
+            }
+
             QW.TextEdit {
                 id: textEdit
                 readOnly: true
                 font.pixelSize: 14
                 font.family: "FiraCode Nerd Font Mono"
-                plainText: MyObject.filename
+                plainText: controller.text
+                QW.HBoxLayout.stretch: 2
             }
         }
     }

@@ -26,6 +26,8 @@ fn main() {
             .release();
     }
 
+    println!("foo4");
+
     if let Some(app) = app.as_mut() {
         app.exec();
     }

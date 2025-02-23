@@ -16,6 +16,9 @@ fn main() {
 
     CxxQtBuilder::new()
         .qt_module("Network")
+        .cc_builder(|cc| {
+            cc.include("src");
+        })
         .qml_module(QmlModule {
             uri: "com.kdab.rebaser",
             rust_files: &["src/cxxqt_object.rs"],
@@ -23,4 +26,7 @@ fn main() {
             ..Default::default()
         })
         .build();
+
+    println!("cargo:rustc-link-search=native=build-dev");
+    println!("cargo:rustc-link-lib=static=RebaserCpp");
 }
