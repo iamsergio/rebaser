@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QScopeGuard>
+#include <qtcoreexports.h>
 
 JsonModel::JsonModel(QObject *parent)
     : QStandardItemModel(parent)
@@ -22,10 +23,13 @@ void JsonModel::setJsonText(const QString &text)
     if (text == m_jsonText)
         return;
 
+    qDebug() << Q_FUNC_INFO << text;
+
     m_jsonText = text;
 
     auto guard = qScopeGuard([this] {
         Q_EMIT jsonTextChanged();
+        Q_EMIT countChanged();
     });
 
     QJsonDocument doc = QJsonDocument::fromJson(text.toUtf8());
@@ -72,4 +76,9 @@ void JsonModel::addRow(const QJsonObject &row, QStandardItem *parent)
 QString JsonModel::jsonText() const
 {
     return m_jsonText;
+}
+
+int JsonModel::count() const
+{
+    return rowCount();
 }

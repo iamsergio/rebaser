@@ -94,11 +94,13 @@ QW.MainWindow {
             QW.TreeView {
                 id: otherBranchesTreeView
                 QW.HBoxLayout.stretch: 1
+                model: otherBranchesTreeModel
             }
 
             QW.ListView {
                 id: workBranchListView
                 QW.HBoxLayout.stretch: 1
+                model: workBranchListModel
             }
 
             QW.TextEdit {

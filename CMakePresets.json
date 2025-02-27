@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "configurePresets": [
     {
       "name": "base",
@@ -7,9 +7,7 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build-${presetName}",
       "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "USE_QT6": "ON",
-        "BUILD_TESTING": "OFF"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
     {
@@ -20,20 +18,18 @@
       }
     },
     {
-      "name": "dev-asan",
-      "inherits": "dev",
-      "binaryDir": "${sourceDir}/build-${presetName}",
+      "name": "rel",
+      "inherits": "base",
       "cacheVariables": {
-        "ENABLE_SANITIZERS": "ON"
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
       }
     },
     {
-      "name": "rel",
-      "inherits": "base",
-      "binaryDir": "${sourceDir}/build-${presetName}",
+      "name": "dev-asan",
+      "inherits": "dev",
+      "description": "dev-asan",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "BUILD_TESTING": "OFF"
+        "ENABLE_ASAN": "ON"
       }
     }
   ]

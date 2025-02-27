@@ -1,4 +1,4 @@
-use serde_json;
+use crate::rebaser;
 
 /// The bridge definition for our QObject
 #[cxx_qt::bridge]
@@ -47,87 +47,8 @@ impl Default for Controller {
     }
 }
 
-#[derive(Debug, Clone)]
-enum Command {
-    PickCommand { sha1: String, message: String },
-    UpdateRefCommand { ref_name: String },
-    LabelCommand { name: String },
-    ResetCommand { name: String },
-    MergeCommand { name: String },
-}
-
-fn commands_from_git_text(git_todo_text: &String) -> Vec<Command> {
-    let mut commands = vec![];
-
-    for line in git_todo_text.lines() {
-        let line = line.trim();
-
-        // Skip empty lines and comments
-        if line.is_empty() || line.starts_with('#') {
-            continue;
-        }
-
-        let parts: Vec<&str> = line.split_whitespace().collect();
-
-        match parts[0] {
-            "pick" => commands.push(Command::PickCommand {
-                sha1: parts[1].to_string(),
-                message: parts[2..].join(" "),
-            }),
-            "update-ref" => commands.push(Command::UpdateRefCommand {
-                ref_name: parts[1].to_string(),
-            }),
-            "label" => commands.push(Command::LabelCommand {
-                name: parts[1].to_string(),
-            }),
-            "reset" => commands.push(Command::ResetCommand {
-                name: parts[1].to_string(),
-            }),
-            "merge" => commands.push(Command::MergeCommand {
-                name: parts[1..].join(" "),
-            }),
-            _ => {}
-        }
-    }
-
-    commands
-}
-
-fn work_branch_json(commands: &Vec<Command>) -> String {
-    let last_reset_index = commands
-        .iter()
-        .enumerate()
-        .rev()
-        .find(|(_, command)| matches!(command, Command::ResetCommand { .. }))
-        .map(|(index, _)| index);
-
-    let work_branch_commands = if let Some(index) = last_reset_index {
-        commands[index..].to_vec()
-    } else {
-        commands.to_vec()
-    };
-
-    let mut worklist = Vec::new();
-
-    for command in work_branch_commands {
-        match command {
-            Command::PickCommand { sha1, message } => {
-                let mut child = serde_json::Map::new();
-                child.insert("name".into(), serde_json::Value::String(message));
-                worklist.push(serde_json::Value::Object(child));
-            }
-            _ => {}
-        }
-    }
-
-    let mut root = serde_json::Map::new();
-    root.insert("children".into(), serde_json::Value::Array(worklist));
-
-    return serde_json::to_string(&root).unwrap();
-}
-
 impl qobject::RustController {
-    pub fn load_data(self: Pin<&mut Self>) {
+    pub fn load_data(mut self: Pin<&mut Self>) {
         let args: Vec<String> = std::env::args().collect();
         let filename = args
             .get(1)
@@ -135,10 +56,21 @@ impl qobject::RustController {
         let file_contents =
             std::fs::read_to_string(filename).expect("Should have been able to read the file11");
 
-        self.set_text(file_contents.clone().into());
+        match rebaser::commands_from_git_text(&file_contents) {
+            Ok(commands) => match rebaser::work_branch_json(&commands) {
+                Ok(json) => {
+                    self.as_mut().set_work_branches_json(json.into());
+                }
+                Err(e) => {
+                    println!("Error getting work branch json: {}", e);
+                }
+            },
+            Err(e) => {
+                println!("Error parsing git commands: {}", e);
+                return;
+            }
+        }
 
-        let commands = commands_from_git_text(&file_contents);
-        println!("foo31");
-        // self.set_work_branches_json(work_branch_json(&commands).into());
+        self.as_mut().set_text(file_contents.clone().into());
     }
 }

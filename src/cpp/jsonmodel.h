@@ -16,15 +16,18 @@ class JsonModel : public QStandardItemModel
     Q_OBJECT
     QML_ELEMENT
     Q_PROPERTY(QString jsonText READ jsonText WRITE setJsonText NOTIFY jsonTextChanged)
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
 public:
     explicit JsonModel(QObject *parent = nullptr);
     ~JsonModel() override;
 
     void setJsonText(const QString &text);
     QString jsonText() const;
+    int count() const;
 
 Q_SIGNALS:
     void jsonTextChanged();
+    void countChanged();
 
 private:
     void addRow(const QJsonObject &row, QStandardItem *parent);
