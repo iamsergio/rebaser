@@ -29,7 +29,11 @@ Q_SIGNALS:
     void jsonTextChanged();
     void countChanged();
 
+protected:
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
 private:
     void addRow(const QJsonObject &row, QStandardItem *parent);
     QString m_jsonText;
+    QStringList m_headerTitles;
 };

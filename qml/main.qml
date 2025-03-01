@@ -97,7 +97,7 @@ QW.MainWindow {
                 model: otherBranchesTreeModel
             }
 
-            QW.ListView {
+            QW.TreeView {
                 id: workBranchListView
                 QW.HBoxLayout.stretch: 1
                 model: workBranchListModel

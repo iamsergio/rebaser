@@ -10,7 +10,7 @@ pub enum Command {
 }
 
 #[derive(Debug)]
-struct Branch {
+pub struct Branch {
     commands: Vec<Command>,
 }
 
@@ -191,6 +191,10 @@ pub fn work_branch_json(commands: &Vec<Command>) -> Result<String, String> {
     }
 
     let mut root = serde_json::Map::new();
+    root.insert(
+        "headers".into(),
+        serde_json::Value::Array(vec![serde_json::Value::String("Work Branch".into())]),
+    );
     root.insert("children".into(), serde_json::Value::Array(worklist));
 
     Ok(serde_json::to_string(&root).unwrap())
@@ -200,6 +204,11 @@ pub fn branches_json(commands: &Vec<Command>) -> Result<String, String> {
     let branches = branches(commands)?;
 
     let mut root = serde_json::Map::new();
+    root.insert(
+        "headers".into(),
+        serde_json::Value::Array(vec![serde_json::Value::String("Branches".into())]),
+    );
+
     let mut branch_list_json = Vec::new();
 
     for branch in branches {
@@ -208,7 +217,7 @@ pub fn branches_json(commands: &Vec<Command>) -> Result<String, String> {
 
         let mut command_list_json = Vec::new();
 
-        // Only include non-reset and non-label commands
+        // Only include pick command
         for command in branch
             .commands
             .iter()

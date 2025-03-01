@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QScopeGuard>
+#include <qnamespace.h>
 #include <qtcoreexports.h>
 
 JsonModel::JsonModel(QObject *parent)
@@ -38,6 +39,13 @@ void JsonModel::setJsonText(const QString &text)
     auto root = doc.object();
     if (root.isEmpty())
         return;
+
+    m_headerTitles.clear();
+    const auto headersJson = root.value("headers").toArray();
+    m_headerTitles.reserve(headersJson.size());
+    for (const auto &header : headersJson) {
+        m_headerTitles.append(header.toString());
+    }
 
     auto rows = root.value("children").toArray();
     if (rows.isEmpty())
@@ -81,4 +89,12 @@ QString JsonModel::jsonText() const
 int JsonModel::count() const
 {
     return rowCount();
+}
+
+QVariant JsonModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole || section < 0 || section >= m_headerTitles.size())
+        return {};
+
+    return m_headerTitles[section];
 }
