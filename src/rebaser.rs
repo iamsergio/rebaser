@@ -9,6 +9,58 @@ pub enum Command {
     MergeCommand { name: String },
 }
 
+#[derive(Debug)]
+struct Branch {
+    commands: Vec<Command>,
+}
+
+impl Branch {
+    pub fn name(&self) -> String {
+        if let Command::LabelCommand { name } = &self.commands[self.commands.len() - 1] {
+            name.clone()
+        } else {
+            String::default()
+        }
+    }
+
+    pub fn onto_branch_name(&self) -> String {
+        if let Command::ResetCommand { name } = &self.commands[0] {
+            name.clone()
+        } else {
+            String::default()
+        }
+    }
+}
+
+impl Command {
+    pub fn is_draggable(&self) -> bool {
+        match self {
+            Command::PickCommand { .. } => true,
+            _ => false,
+        }
+    }
+
+    pub fn description(&self) -> String {
+        match self {
+            Command::PickCommand { sha1: _, message } => {
+                format!("pick {}", message)
+            }
+            Command::UpdateRefCommand { ref_name } => {
+                format!("u {}", ref_name)
+            }
+            Command::ResetCommand { name } => {
+                format!("reset {}", name)
+            }
+            Command::MergeCommand { name } => {
+                format!("merge {}", name)
+            }
+            Command::LabelCommand { name } => {
+                format!("label {}", name)
+            }
+        }
+    }
+}
+
 pub fn commands_from_git_text(git_todo_text: &String) -> Result<Vec<Command>, String> {
     let mut commands = vec![];
 
@@ -77,54 +129,112 @@ pub fn work_branch_commands(commands: &Vec<Command>) -> Result<Vec<Command>, Str
     }
 }
 
+pub fn branches(commands: &[Command]) -> Result<Vec<Branch>, String> {
+    if !matches!(commands.first(), Some(Command::LabelCommand { .. })) {
+        return Err("First command must be a label".to_string());
+    }
+
+    // Discard the label
+    let commands = &commands[1..];
+
+    let mut branches = Vec::new();
+    let mut current_branch = Vec::new();
+
+    for command in commands {
+        if current_branch.is_empty() && !matches!(command, Command::ResetCommand { .. }) {
+            return Err("Branch must start with reset command".to_string());
+        }
+
+        current_branch.push(command.clone());
+
+        if let Command::LabelCommand { .. } = command {
+            branches.push(Branch {
+                commands: current_branch.clone(),
+            });
+            current_branch.clear();
+        }
+    }
+
+    if branches.is_empty() {
+        return Err("No branches found".to_string());
+    }
+
+    Ok(branches)
+}
+
 pub fn work_branch_json(commands: &Vec<Command>) -> Result<String, String> {
     let commands = work_branch_commands(commands)?;
 
-    // Discard the 1st command, which is always "reset onto", we won't display it in the GUI
-    let commands = commands[1..].to_vec();
+    // "reset onto" isn't interesting to show
+    let commands = commands.iter().filter(|cmd| {
+        !matches!(
+            cmd,
+            Command::ResetCommand { .. } | Command::LabelCommand { .. }
+        )
+    });
 
     let mut worklist = Vec::new();
 
     for command in commands {
-        match command {
-            Command::PickCommand { sha1, message } => {
-                let mut child = serde_json::Map::new();
-                child.insert(
-                    "name".into(),
-                    serde_json::Value::String(format!("pick {}", message)),
-                );
-                worklist.push(serde_json::Value::Object(child));
-            }
-            Command::UpdateRefCommand { ref_name } => {
-                let mut child = serde_json::Map::new();
-                child.insert(
-                    "name".into(),
-                    serde_json::Value::String(format!("u {}", ref_name)),
-                );
-                worklist.push(serde_json::Value::Object(child));
-            }
-            Command::ResetCommand { name } => {
-                let mut child = serde_json::Map::new();
-                child.insert(
-                    "name".into(),
-                    serde_json::Value::String(format!("reset {}", name)),
-                );
-                worklist.push(serde_json::Value::Object(child));
-            }
-            Command::MergeCommand { name } => {
-                let mut child = serde_json::Map::new();
-                child.insert(
-                    "name".into(),
-                    serde_json::Value::String(format!("merge {}", name)),
-                );
-                worklist.push(serde_json::Value::Object(child));
-            }
-            _ => continue,
-        }
+        let mut child = serde_json::Map::new();
+        child.insert(
+            "name".into(),
+            serde_json::Value::String(command.description()),
+        );
+
+        child.insert(
+            "is_draggable".into(),
+            serde_json::Value::Bool(command.is_draggable()),
+        );
+
+        worklist.push(serde_json::Value::Object(child));
     }
 
     let mut root = serde_json::Map::new();
     root.insert("children".into(), serde_json::Value::Array(worklist));
 
-    return Ok(serde_json::to_string(&root).unwrap());
+    Ok(serde_json::to_string(&root).unwrap())
+}
+
+pub fn branches_json(commands: &Vec<Command>) -> Result<String, String> {
+    let branches = branches(commands)?;
+
+    let mut root = serde_json::Map::new();
+    let mut branch_list_json = Vec::new();
+
+    for branch in branches {
+        let mut branch_obj = serde_json::Map::new();
+        branch_obj.insert("name".into(), serde_json::Value::String(branch.name()));
+
+        let mut command_list_json = Vec::new();
+
+        // Only include non-reset and non-label commands
+        for command in branch
+            .commands
+            .iter()
+            .filter(|cmd| matches!(cmd, Command::PickCommand { .. }))
+        {
+            let mut child_commands = serde_json::Map::new();
+            child_commands.insert(
+                "name".into(),
+                serde_json::Value::String(command.description()),
+            );
+
+            command_list_json.push(serde_json::Value::Object(child_commands));
+        }
+
+        branch_obj.insert(
+            "children".into(),
+            serde_json::Value::Array(command_list_json),
+        );
+
+        branch_list_json.push(serde_json::Value::Object(branch_obj));
+    }
+
+    root.insert(
+        "children".into(),
+        serde_json::Value::Array(branch_list_json),
+    );
+
+    Ok(serde_json::to_string(&root).unwrap())
 }

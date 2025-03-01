@@ -57,14 +57,25 @@ impl qobject::RustController {
             std::fs::read_to_string(filename).expect("Should have been able to read the file11");
 
         match rebaser::commands_from_git_text(&file_contents) {
-            Ok(commands) => match rebaser::work_branch_json(&commands) {
-                Ok(json) => {
-                    self.as_mut().set_work_branches_json(json.into());
+            Ok(commands) => {
+                match rebaser::work_branch_json(&commands) {
+                    Ok(json) => {
+                        self.as_mut().set_work_branches_json(json.into());
+                    }
+                    Err(e) => {
+                        println!("Error getting work branch json: {}", e);
+                    }
                 }
-                Err(e) => {
-                    println!("Error getting work branch json: {}", e);
+
+                match rebaser::branches_json(&commands) {
+                    Ok(json) => {
+                        self.as_mut().set_other_branches_json(json.into());
+                    }
+                    Err(e) => {
+                        println!("Error getting branches json: {}", e);
+                    }
                 }
-            },
+            }
             Err(e) => {
                 println!("Error parsing git commands: {}", e);
                 return;
