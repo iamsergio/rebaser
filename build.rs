@@ -28,5 +28,5 @@ fn main() {
         .build();
 
     println!("cargo:rustc-link-search=native=build-dev");
-    println!("cargo:rustc-link-lib=static=RebaserCpp");
+    // println!("cargo:rustc-link-lib=static=RebaserCpp");
 }
