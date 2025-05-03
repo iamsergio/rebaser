@@ -1,0 +1,7 @@
+CompileFlags:
+  Add: -Wno-unknown-warning-option
+  Remove: [-fcoroutines, -fhardened, -mno-direct-extern-access]
+InlayHints:
+  Enabled: No
+  ParameterNames: Yes
+  DeducedTypes: No
