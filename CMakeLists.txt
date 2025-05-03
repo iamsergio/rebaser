@@ -13,6 +13,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(BUILD_EXAMPLES FALSE)
+set(USE_QT6 ON)
 add_subdirectory(3rdparty/DeclarativeWidgets)
 
 configure_file(${CMAKE_SOURCE_DIR}/qmlls.ini.in ${CMAKE_SOURCE_DIR}/.qmlls.ini
