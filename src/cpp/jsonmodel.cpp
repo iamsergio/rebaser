@@ -7,8 +7,6 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QScopeGuard>
-#include <qnamespace.h>
-#include <qtcoreexports.h>
 
 JsonModel::JsonModel(QObject *parent)
     : QStandardItemModel(parent)

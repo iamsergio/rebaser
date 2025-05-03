@@ -4,7 +4,6 @@
 
 #include <QStandardItemModel>
 #include <QQmlEngine>
-#include <qtmetamacros.h>
 
 
 /*
