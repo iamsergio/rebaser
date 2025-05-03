@@ -31,6 +31,9 @@ Q_SIGNALS:
 
 protected:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QStringList mimeTypes() const override;
+    Qt::DropActions supportedDropActions() const override;
 
 private:
     void addRow(const QJsonObject &row, QStandardItem *parent);

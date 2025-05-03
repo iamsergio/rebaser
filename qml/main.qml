@@ -95,12 +95,16 @@ QW.MainWindow {
                 id: otherBranchesTreeView
                 QW.HBoxLayout.stretch: 1
                 model: otherBranchesTreeModel
+                acceptDrops: true
+                dragEnabled: true
             }
 
             QW.TreeView {
                 id: workBranchListView
                 QW.HBoxLayout.stretch: 1
                 model: workBranchListModel
+                acceptDrops: false
+                dragEnabled: true
             }
 
             QW.TextEdit {

@@ -69,6 +69,7 @@ void JsonModel::addRow(const QJsonObject &row, QStandardItem *parent)
 {
     auto item = new QStandardItem(row.value("name").toString());
     parent->appendRow(item);
+    item->setDragEnabled(true);
 
     const auto children = row.value("children").toArray();
     for (const auto &child : children) {
@@ -97,4 +98,21 @@ QVariant JsonModel::headerData(int section, Qt::Orientation orientation, int rol
         return {};
 
     return m_headerTitles[section];
+}
+
+Qt::ItemFlags JsonModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsDropEnabled; // Allow dropping at root level
+    return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
+}
+
+QStringList JsonModel::mimeTypes() const
+{
+    return { "application/vnd.text.list" };
+}
+
+Qt::DropActions JsonModel::supportedDropActions() const
+{
+    return Qt::MoveAction | Qt::CopyAction;
 }
