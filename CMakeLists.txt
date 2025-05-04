@@ -16,7 +16,9 @@ set(BUILD_EXAMPLES FALSE)
 set(USE_QT6 ON)
 add_subdirectory(3rdparty/DeclarativeWidgets)
 
-configure_file(${CMAKE_SOURCE_DIR}/qmlls.ini.in ${CMAKE_SOURCE_DIR}/.qmlls.ini
-               @ONLY)
+if(NOT QT_QML_GENERATE_QMLLS_INI)
+  configure_file(${CMAKE_SOURCE_DIR}/qmlls.ini.in
+                 ${CMAKE_SOURCE_DIR}/.qmlls.ini @ONLY)
+endif()
 
 add_subdirectory(src/cpp)
